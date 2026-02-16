@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinguaAI - Aprenda Idiomas com IA</title>
+    <meta name="description" content="Aprenda idiomas com IA através de conversação por áudio, vídeos diários e gamificação. Suporte para inglês, espanhol, francês, alemão, italiano e japonês.">
+    <meta name="keywords" content="aprender idiomas, IA, inglês, espanhol, francês, alemão, italiano, japonês, educação, gamificação">
+    <meta name="author" content="LinguaAI">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LinguaAI">
+    <meta name="application-name" content="LinguaAI">
+    <meta name="theme-color" content="#667eea">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-navbutton-color" content="#667eea">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png">
+    <link rel="apple-touch-icon" href="icon-180x180.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        /* Points Display in Header */
+        .points-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .points-display .points {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffc107;
+        }
+
+        .points-display .label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .level-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: bold;
+        }
+
+        .tab:hover {
+            background: #f5f5f5;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .language-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .language-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+
+        .language-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .language-card.selected {
+            box-shadow: 0 0 0 4px #4CAF50;
+        }
+
+        .language-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .level-selector {
+            margin: 20px 0;
+        }
+
+        .level-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            padding: 12px 25px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .level-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .level-btn.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-container {
+            background: #f9f9f9;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.ai {
+            background: white;
+            border: 2px solid #e0e0e0;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .recording {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .video-container {
+            margin: 20px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-container video {
+            width: 100%;
+            display: block;
+        }
+
+        .news-feed {
+            display: grid;
+            gap: 20px;
+        }
+
+        .news-card {
+            padding: 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .news-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .news-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .progress-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .suggestions-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .suggestions-box h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h4 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .emoji {
+            font-size: 1.5em;
+        }
+
+        .daily-streak {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .daily-streak h2 {
+            font-size: 2em;
+        }
+
+        .daily-streak .streak-number {
+            font-size: 4em;
+            font-weight: bold;
+        }
+
+        /* GAMIFICATION STYLES */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .achievement-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        .achievement-card.unlocked {
+            border: 3px solid #ffc107;
+            animation: unlockPulse 1s;
+        }
+
+        @keyframes unlockPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .achievement-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .achievement-title {
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0 5px 0;
+        }
+
+        .achievement-description {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .achievement-points {
+            background: #ffc107;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .unlock-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+
+        .leaderboard {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .leaderboard-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .leaderboard-rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            width: 50px;
+        }
+
+        .leaderboard-rank.gold {
+            color: #ffc107;
+        }
+
+        .leaderboard-rank.silver {
+            color: #c0c0c0;
+        }
+
+        .leaderboard-rank.bronze {
+            color: #cd7f32;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .leaderboard-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .leaderboard-level {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .leaderboard-points {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffc107;
+        }
+
+        .points-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            color: #ffc107;
+            z-index: 9999;
+            animation: pointsFloat 2s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes pointsFloat {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            50% {
+                transform: translate(-50%, -80%) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -120%) scale(0.8);
+            }
+        }
+
+        .quest-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .quest-title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .quest-reward {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .quest-progress-bar {
+            background: rgba(255, 255, 255, 0.3);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .quest-progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .quest-description {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .daily-challenges {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .challenge-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .challenge-item.completed {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+
+        .challenge-info {
+            flex: 1;
+        }
+
+        .challenge-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .challenge-reward {
+            color: #ffc107;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .challenge-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .challenge-status.pending {
+            background: #ffc107;
+            color: white;
+        }
+
+        .challenge-status.completed {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideInRight 0.5s;
+            max-width: 350px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-popup.success {
+            border-left: 5px solid #4CAF50;
+        }
+
+        .notification-popup.achievement {
+            border-left: 5px solid #ffc107;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffe6a0 100%);
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .notification-icon {
+            font-size: 2em;
+        }
+
+        .notification-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .notification-message {
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .level-up-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s;
+        }
+
+        .level-up-content {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: scaleIn 0.5s;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .level-up-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .level-up-title {
+            font-size: 2.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .level-up-subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .level-up-rewards {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .points-display, .level-badge {
+                position: static;
+                margin: 10px auto;
+            }
+
+            .achievements-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="level-badge" id="levelBadge">
+                <span>🏆 Nível 1</span>
+            </div>
+            <div class="points-display">
+                <div>
+                    <div class="points" id="pointsDisplay">0</div>
+                    <div class="label">Pontos</div>
+                </div>
+            </div>
+            <h1>🌍 LinguaAI</h1>
+            <p>Aprenda idiomas com conversas em áudio e vídeos de notícias diárias</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('setup')">⚙️ Configuração</button>
+                <button class="tab" onclick="showTab('conversation')">💬 Conversação</button>
+                <button class="tab" onclick="showTab('daily-video')">🎥 Vídeo Diário</button>
+                <button class="tab" onclick="showTab('gamification')">🎮 Conquistas</button>
+                <button class="tab" onclick="showTab('quests')">🎯 Missões</button>
+                <button class="tab" onclick="showTab('progress')">📊 Progresso</button>
+                <button class="tab" onclick="showTab('suggestions')">💡 Sugestões</button>
+            </div>
+
+            <!-- Tab: Setup -->
+            <div id="setup" class="tab-content active">
+                <h2>Escolha seu idioma de aprendizado</h2>
+                <div class="language-selector">
+                    <div class="language-card" onclick="selectLanguage('english')">
+                        <h3>🇬🇧 English</h3>
+                        <p>Inglês</p>
+                    </div>
+                    <div class="language-card" onclick="selectLanguage('spanish')">
+                        <h3>🇪🇸 Español</h3>
+                        <p>Espanhol</p>
+                    </div>
+                    <div class="language-card" onclick="selectLanguage('french')">
+                        <h3>🇫🇷 Français</h3>
+                        <p>Francês</p>
+                    </div>
+                    <div class="language-card" onclick="selectLanguage('german')">
+                        <h3>🇩🇪 Deutsch</h3>
+                        <p>Alemão</p>
+                    </div>
+                    <div class="language-card" onclick="selectLanguage('italian')">
+                        <h3>🇮🇹 Italiano</h3>
+                        <p>Italiano</p>
+                    </div>
+                    <div class="language-card" onclick="selectLanguage('japanese')">
+                        <h3>🇯🇵 日本語</h3>
+                        <p>Japonês</p>
+                    </div>
+                </div>
+
+                <div class="level-selector">
+                    <h2>Qual é o seu nível?</h2>
+                    <div class="level-buttons">
+                        <button class="level-btn" onclick="selectLevel('beginner')">🌱 Iniciante</button>
+                        <button class="level-btn" onclick="selectLevel('intermediate')">🌿 Intermediário</button>
+                        <button class="level-btn" onclick="selectLevel('advanced')">🌳 Avançado</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="startLearning()">
+                    ✨ Começar a Aprender
+                </button>
+            </div>
+
+            <!-- Tab: Conversation -->
+            <div id="conversation" class="tab-content">
+                <h2>💬 Conversação com IA</h2>
+                
+                <div class="daily-streak">
+                    <h2>🔥 Sequência Diária</h2>
+                    <div class="streak-number" id="streakNumber">0</div>
+                    <p>dias consecutivos</p>
+                </div>
+
+                <div class="chat-container" id="chatContainer">
+                    <div class="message ai">
+                        <p><strong>LinguaAI:</strong> Olá! Estou pronto para conversar com você. Clique no botão de microfone para começar!</p>
+                    </div>
+                </div>
+
+                <div class="audio-controls">
+                    <button class="btn btn-primary" id="recordBtn" onclick="toggleRecording()">
+                        🎤 Iniciar Gravação
+                    </button>
+                    <button class="btn btn-secondary" onclick="playAIResponse()">
+                        🔊 Ouvir Resposta da IA
+                    </button>
+                    <button class="btn btn-secondary" onclick="requestHint()">
+                        💡 Pedir Dica
+                    </button>
+                </div>
+
+                <div class="input-group">
+                    <label>Ou digite sua mensagem:</label>
+                    <textarea id="textInput" rows="3" placeholder="Digite aqui se preferir não usar áudio..."></textarea>
+                    <button class="btn btn-primary" onclick="sendTextMessage()" style="margin-top: 10px;">
+                        ✉️ Enviar Mensagem
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Daily Video -->
+            <div id="daily-video" class="tab-content">
+                <h2>🎥 Vídeo de Notícias Diário</h2>
+                <p>Assista ao vídeo gerado com notícias reais no seu idioma de aprendizado!</p>
+
+                <div class="video-container" id="videoContainer">
+                    <video controls id="dailyVideo">
+                        <source src="" type="video/mp4">
+                        Seu navegador não suporta vídeo HTML5.
+                    </video>
+                </div>
+
+                <button class="btn btn-primary" onclick="generateDailyVideo()">
+                    🎬 Gerar Novo Vídeo Diário
+                </button>
+
+                <div id="videoLoader" class="hidden">
+                    <div class="loader"></div>
+                    <p style="text-align: center;">Gerando seu vídeo personalizado... Isso pode levar alguns minutos.</p>
+                </div>
+
+                <div class="news-feed" id="newsFeed">
+                    <h3 style="margin-top: 30px;">📰 Notícias Usadas no Vídeo</h3>
+                </div>
+
+                <button class="btn btn-secondary" onclick="discussVideo()" style="margin-top: 20px;">
+                    💭 Discutir este vídeo com a IA
+                </button>
+            </div>
+
+            <!-- Tab: Gamification -->
+            <div id="gamification" class="tab-content">
+                <h2>🏆 Conquistas e Badges</h2>
+                <p>Desbloqueie conquistas conforme você progride no aprendizado!</p>
+
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- Achievements will be dynamically loaded here -->
+                </div>
+
+                <h2 style="margin-top: 40px;">🏅 Ranking Global</h2>
+                <div class="leaderboard" id="leaderboard">
+                    <!-- Leaderboard will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Tab: Quests -->
+            <div id="quests" class="tab-content">
+                <h2>🎯 Missões Ativas</h2>
+                <p>Complete missões para ganhar pontos e experiência!</p>
+
+                <div id="questsContainer">
+                    <!-- Quests will be dynamically loaded here -->
+                </div>
+
+                <h2 style="margin-top: 40px;">⚡ Desafios Diários</h2>
+                <p>Novos desafios todos os dias! Resete em: <strong id="resetTimer">23:45:12</strong></p>
+
+                <div class="daily-challenges" id="dailyChallenges">
+                    <!-- Daily challenges will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Tab: Progress -->
+            <div id="progress" class="tab-content">
+                <h2>📊 Seu Progresso</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Total de Conversas</h4>
+                        <div class="value" id="totalConversations">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Minutos Praticados</h4>
+                        <div class="value" id="minutesPracticed">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Palavras Aprendidas</h4>
+                        <div class="value" id="wordsLearned">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Nível Atual</h4>
+                        <div class="value" id="currentLevel">-</div>
+                    </div>
+                </div>
+
+                <div class="progress-section">
+                    <h3>Fluência Geral</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="fluencyProgress" style="width: 0%;">0%</div>
+                    </div>
+
+                    <h3 style="margin-top: 20px;">Habilidades</h3>
+                    
+                    <h4>🗣️ Fala</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="speakingProgress" style="width: 0%;">0%</div>
+                    </div>
+
+                    <h4>👂 Audição</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="listeningProgress" style="width: 0%;">0%</div>
+                    </div>
+
+                    <h4>📖 Vocabulário</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="vocabularyProgress" style="width: 0%;">0%</div>
+                    </div>
+
+                    <h4>✍️ Gramática</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="grammarProgress" style="width: 0%;">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Suggestions -->
+            <div id="suggestions" class="tab-content">
+                <h2>💡 Sugestões Personalizadas</h2>
+                
+                <div class="suggestions-box">
+                    <h3>🎯 Recomendações para Você</h3>
+                    <div id="suggestionsContent">
+                        <div class="suggestion-item">
+                            <strong>📚 Foco em Vocabulário:</strong> Você conhece 450 palavras. Tente aprender 10 novas palavras por dia para alcançar 1000 palavras em 2 meses!
+                        </div>
+                        <div class="suggestion-item">
+                            <strong>🗣️ Pratique mais a pronúncia:</strong> Sua pronúncia está melhorando! Continue praticando sons difíceis como "th" em inglês.
+                        </div>
+                        <div class="suggestion-item">
+                            <strong>⏰ Melhor horário:</strong> Você aprende melhor pela manhã. Tente manter suas sessões entre 8h-10h.
+                        </div>
+                        <div class="suggestion-item">
+                            <strong>🎬 Conteúdo Recomendado:</strong> Assista a séries com legendas no idioma que está aprendendo para melhorar compreensão auditiva.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="suggestions-box" style="background: #d1ecf1; border-left-color: #0c5460;">
+                    <h3 style="color: #0c5460;">📈 Próximos Objetivos</h3>
+                    <div id="goalsContent">
+                        <div class="suggestion-item">
+                            <strong>✅ Curto Prazo (Esta Semana):</strong> Complete 7 conversações diárias consecutivas
+                        </div>
+                        <div class="suggestion-item">
+                            <strong>🎯 Médio Prazo (Este Mês):</strong> Aumente seu vocabulário em 150 palavras
+                        </div>
+                        <div class="suggestion-item">
+                            <strong>🏆 Longo Prazo (3 Meses):</strong> Alcance nível intermediário e tenha conversas de 10+ minutos
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="getPersonalizedSuggestions()">
+                    🔄 Atualizar Sugestões
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State with Gamification
+        let appState = {
+            selectedLanguage: null,
+            selectedLevel: null,
+            isRecording: false,
+            conversationHistory: [],
+            dailyStreak: 0,
+            points: 0,
+            level: 1,
+            experience: 0,
+            experienceToNextLevel: 100,
+            stats: {
+                totalConversations: 0,
+                minutesPracticed: 0,
+                wordsLearned: 0,
+                fluency: 0,
+                speaking: 0,
+                listening: 0,
+                vocabulary: 0,
+                grammar: 0
+            },
+            achievements: [],
+            quests: [],
+            dailyChallenges: []
+        };
+
+        // Achievement Definitions
+        const achievementDefinitions = [
+            {
+                id: 'first_conversation',
+                icon: '💬',
+                title: 'Primeira Conversa',
+                description: 'Complete sua primeira conversa',
+                points: 50,
+                condition: () => appState.stats.totalConversations >= 1
+            },
+            {
+                id: 'conversation_master',
+                icon: '🎙️',
+                title: 'Mestre das Conversas',
+                description: 'Complete 50 conversas',
+                points: 500,
+                condition: () => appState.stats.totalConversations >= 50
+            },
+            {
+                id: 'week_streak',
+                icon: '🔥',
+                title: 'Semana em Chamas',
+                description: 'Mantenha uma sequência de 7 dias',
+                points: 200,
+                condition: () => appState.dailyStreak >= 7
+            },
+            {
+                id: 'month_streak',
+                icon: '🌟',
+                title: 'Dedicação Total',
+                description: 'Mantenha uma sequência de 30 dias',
+                points: 1000,
+                condition: () => appState.dailyStreak >= 30
+            },
+            {
+                id: 'vocabulary_100',
+                icon: '📚',
+                title: 'Vocabulário Básico',
+                description: 'Aprenda 100 palavras',
+                points: 300,
+                condition: () => appState.stats.wordsLearned >= 100
+            },
+            {
+                id: 'vocabulary_500',
+                icon: '📖',
+                title: 'Leitor Ávido',
+                description: 'Aprenda 500 palavras',
+                points: 800,
+                condition: () => appState.stats.wordsLearned >= 500
+            },
+            {
+                id: 'early_bird',
+                icon: '🌅',
+                title: 'Madrugador',
+                description: 'Pratique 5 vezes antes das 9h',
+                points: 150,
+                condition: () => false // Would need to track time
+            },
+            {
+                id: 'night_owl',
+                icon: '🌙',
+                title: 'Coruja Noturna',
+                description: 'Pratique 5 vezes após 22h',
+                points: 150,
+                condition: () => false
+            },
+            {
+                id: 'video_watcher',
+                icon: '🎬',
+                title: 'Cinéfilo',
+                description: 'Assista 10 vídeos diários',
+                points: 250,
+                condition: () => false
+            },
+            {
+                id: 'speed_demon',
+                icon: '⚡',
+                title: 'Raio Veloz',
+                description: 'Complete 10 desafios diários',
+                points: 400,
+                condition: () => false
+            },
+            {
+                id: 'perfectionist',
+                icon: '💯',
+                title: 'Perfeccionista',
+                description: 'Alcance 100% em todas as habilidades',
+                points: 2000,
+                condition: () => appState.stats.fluency === 100
+            },
+            {
+                id: 'polyglot',
+                icon: '🌍',
+                title: 'Poliglota',
+                description: 'Aprenda 3 idiomas diferentes',
+                points: 1500,
+                condition: () => false
+            }
+        ];
+
+        // Quest Definitions
+        const questDefinitions = [
+            {
+                id: 'daily_practice',
+                title: 'Prática Diária',
+                description: 'Pratique por 15 minutos hoje',
+                reward: 100,
+                progress: 0,
+                goal: 15,
+                type: 'minutes'
+            },
+            {
+                id: 'conversation_quest',
+                title: 'Mestre da Conversação',
+                description: 'Complete 5 conversas esta semana',
+                reward: 250,
+                progress: 0,
+                goal: 5,
+                type: 'conversations'
+            },
+            {
+                id: 'vocabulary_quest',
+                title: 'Caçador de Palavras',
+                description: 'Aprenda 20 novas palavras',
+                reward: 300,
+                progress: 0,
+                goal: 20,
+                type: 'words'
+            }
+        ];
+
+        // Daily Challenge Definitions
+        const dailyChallengeDefinitions = [
+            {
+                id: 'morning_practice',
+                title: 'Prática Matinal',
+                reward: 50,
+                completed: false
+            },
+            {
+                id: 'perfect_pronunciation',
+                title: 'Pronúncia Perfeita',
+                reward: 75,
+                completed: false
+            },
+            {
+                id: 'watch_video',
+                title: 'Assistir Vídeo Diário',
+                reward: 60,
+                completed: false
+            },
+            {
+                id: 'five_conversations',
+                title: '5 Conversas Hoje',
+                reward: 100,
+                completed: false
+            }
+        ];
+
+        // Initialize Gamification
+        function initializeGamification() {
+            appState.achievements = achievementDefinitions.map(def => ({
+                ...def,
+                unlocked: false,
+                unlockedAt: null
+            }));
+
+            appState.quests = JSON.parse(JSON.stringify(questDefinitions));
+            appState.dailyChallenges = JSON.parse(JSON.stringify(dailyChallengeDefinitions));
+
+            renderAchievements();
+            renderQuests();
+            renderDailyChallenges();
+            renderLeaderboard();
+        }
+
+        // Render Achievements
+        function renderAchievements() {
+            const grid = document.getElementById('achievementsGrid');
+            grid.innerHTML = '';
+
+            appState.achievements.forEach(achievement => {
+                const card = document.createElement('div');
+                card.className = `achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`;
+                card.onclick = () => showAchievementDetail(achievement);
+
+                card.innerHTML = `
+                    ${achievement.unlocked ? '<div class="unlock-badge">✓</div>' : ''}
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-title">${achievement.title}</div>
+                    <div class="achievement-description">${achievement.description}</div>
+                    <div class="achievement-points">+${achievement.points} pts</div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Check and Unlock Achievements
+        function checkAchievements() {
+            appState.achievements.forEach(achievement => {
+                if (!achievement.unlocked && achievement.condition()) {
+                    unlockAchievement(achievement);
+                }
+            });
+        }
+
+        // Unlock Achievement
+        function unlockAchievement(achievement) {
+            achievement.unlocked = true;
+            achievement.unlockedAt = Date.now();
+            
+            addPoints(achievement.points);
+            showNotification('achievement', '🏆 Conquista Desbloqueada!', 
+                `${achievement.icon} ${achievement.title} - +${achievement.points} pontos!`);
+            
+            renderAchievements();
+            saveState();
+        }
+
+        // Show Achievement Detail
+        function showAchievementDetail(achievement) {
+            const status = achievement.unlocked ? 
+                `Desbloqueada em ${new Date(achievement.unlockedAt).toLocaleDateString()}` : 
+                'Bloqueada - Continue progredindo!';
+            
+            alert(`${achievement.icon} ${achievement.title}\n\n${achievement.description}\n\nRecompensa: ${achievement.points} pontos\n\nStatus: ${status}`);
+        }
+
+        // Render Quests
+        function renderQuests() {
+            const container = document.getElementById('questsContainer');
+            container.innerHTML = '';
+
+            appState.quests.forEach(quest => {
+                const progressPercent = Math.min((quest.progress / quest.goal) * 100, 100);
+                
+                const questCard = document.createElement('div');
+                questCard.className = 'quest-card';
+                questCard.innerHTML = `
+                    <div class="quest-header">
+                        <div class="quest-title">${quest.title}</div>
+                        <div class="quest-reward">+${quest.reward} pts</div>
+                    </div>
+                    <div class="quest-description">${quest.description}</div>
+                    <div class="quest-progress-bar">
+                        <div class="quest-progress-fill" style="width: ${progressPercent}%;">
+                            ${quest.progress}/${quest.goal}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(questCard);
+            });
+        }
+
+        // Update Quest Progress
+        function updateQuestProgress(type, amount = 1) {
+            appState.quests.forEach(quest => {
+                if (quest.type === type && quest.progress < quest.goal) {
+                    quest.progress += amount;
+                    
+                    if (quest.progress >= quest.goal) {
+                        completeQuest(quest);
+                    }
+                }
+            });
+
+            renderQuests();
+            saveState();
+        }
+
+        // Complete Quest
+        function completeQuest(quest) {
+            addPoints(quest.reward);
+            showNotification('success', '🎯 Missão Completa!', 
+                `${quest.title} - +${quest.reward} pontos!`);
+        }
+
+        // Render Daily Challenges
+        function renderDailyChallenges() {
+            const container = document.getElementById('dailyChallenges');
+            container.innerHTML = '';
+
+            appState.dailyChallenges.forEach(challenge => {
+                const challengeDiv = document.createElement('div');
+                challengeDiv.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
+                challengeDiv.innerHTML = `
+                    <div class="challenge-info">
+                        <div class="challenge-title">${challenge.title}</div>
+                        <div class="challenge-reward">Recompensa: ${challenge.reward} pontos</div>
+                    </div>
+                    <div class="challenge-status ${challenge.completed ? 'completed' : 'pending'}">
+                        ${challenge.completed ? '✓ Completo' : 'Pendente'}
+                    </div>
+                `;
+
+                container.appendChild(challengeDiv);
+            });
+        }
+
+        // Complete Daily Challenge
+        function completeDailyChallenge(challengeId) {
+            const challenge = appState.dailyChallenges.find(c => c.id === challengeId);
+            if (challenge && !challenge.completed) {
+                challenge.completed = true;
+                addPoints(challenge.reward);
+                showNotification('success', '⚡ Desafio Completo!', 
+                    `${challenge.title} - +${challenge.reward} pontos!`);
+                renderDailyChallenges();
+                saveState();
+            }
+        }
+
+        // Render Leaderboard
+        function renderLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            
+            // Sample leaderboard data
+            const leaderboardData = [
+                { rank: 1, name: 'Você', level: appState.level, points: appState.points },
+                { rank: 2, name: 'Maria Silva', level: 5, points: 2450 },
+                { rank: 3, name: 'João Santos', level: 4, points: 1890 },
+                { rank: 4, name: 'Ana Costa', level: 4, points: 1650 },
+                { rank: 5, name: 'Pedro Oliveira', level: 3, points: 1230 }
+            ];
+
+            leaderboard.innerHTML = '';
+
+            leaderboardData.forEach(player => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+
+                let rankClass = '';
+                if (player.rank === 1) rankClass = 'gold';
+                else if (player.rank === 2) rankClass = 'silver';
+                else if (player.rank === 3) rankClass = 'bronze';
+
+                item.innerHTML = `
+                    <div class="leaderboard-rank ${rankClass}">#${player.rank}</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">${player.name}</div>
+                        <div class="leaderboard-level">Nível ${player.level}</div>
+                    </div>
+                    <div class="leaderboard-points">${player.points} pts</div>
+                `;
+
+                leaderboard.appendChild(item);
+            });
+        }
+
+        // Add Points
+        function addPoints(points) {
+            appState.points += points;
+            appState.experience += points;
+
+            // Show points animation
+            showPointsAnimation(points);
+
+            // Update display
+            document.getElementById('pointsDisplay').textContent = appState.points;
+
+            // Check for level up
+            if (appState.experience >= appState.experienceToNextLevel) {
+                levelUp();
+            }
+
+            saveState();
+        }
+
+        // Show Points Animation
+        function showPointsAnimation(points) {
+            const animation = document.createElement('div');
+            animation.className = 'points-animation';
+            animation.textContent = `+${points}`;
+            document.body.appendChild(animation);
+
+            setTimeout(() => {
+                animation.remove();
+            }, 2000);
+        }
+
+        // Level Up
+        function levelUp() {
+            appState.level++;
+            appState.experience -= appState.experienceToNextLevel;
+            appState.experienceToNextLevel = Math.floor(appState.experienceToNextLevel * 1.5);
+
+            showLevelUpModal();
+            updateLevelBadge();
+            saveState();
+        }
+
+        // Show Level Up Modal
+        function showLevelUpModal() {
+            const modal = document.createElement('div');
+            modal.className = 'level-up-modal';
+            modal.innerHTML = `
+                <div class="level-up-content">
+                    <div class="level-up-icon">🎉</div>
+                    <div class="level-up-title">Nível ${appState.level}!</div>
+                    <div class="level-up-subtitle">Parabéns! Você subiu de nível!</div>
+                    <div class="level-up-rewards">
+                        <h3>Recompensas:</h3>
+                        <p>💎 100 Pontos Bônus</p>
+                        <p>🎁 Nova conquista desbloqueada</p>
+                        <p>⭐ Acesso a recursos avançados</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="this.closest('.level-up-modal').remove()">
+                        🎊 Continuar
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            addPoints(100); // Bonus points for leveling up
+        }
+
+        // Update Level Badge
+        function updateLevelBadge() {
+            document.getElementById('levelBadge').innerHTML = `<span>🏆 Nível ${appState.level}</span>`;
+        }
+
+        // Show Notification
+        function showNotification(type, title, message) {
+            const notification = document.createElement('div');
+            notification.className = `notification-popup ${type}`;
+            
+            const icon = type === 'achievement' ? '🏆' : '✅';
+            
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-icon">${icon}</div>
+                    <div class="notification-title">${title}</div>
+                </div>
+                <div class="notification-message">${message}</div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Load saved state
+        function loadState() {
+            const saved = localStorage.getItem('linguaAIState');
+            if (saved) {
+                appState = { ...appState, ...JSON.parse(saved) };
+                updateUI();
+            } else {
+                initializeGamification();
+            }
+        }
+
+        // Save state
+        function saveState() {
+            localStorage.setItem('linguaAIState', JSON.stringify(appState));
+        }
+
+        // Tab Management
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Language Selection
+        function selectLanguage(language) {
+            document.querySelectorAll('.language-card').forEach(card => card.classList.remove('selected'));
+            event.target.closest('.language-card').classList.add('selected');
+            appState.selectedLanguage = language;
+            saveState();
+        }
+
+        // Level Selection
+        function selectLevel(level) {
+            document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            appState.selectedLevel = level;
+            saveState();
+        }
+
+        // Start Learning
+        function startLearning() {
+            if (!appState.selectedLanguage || !appState.selectedLevel) {
+                alert('Por favor, selecione um idioma e seu nível primeiro!');
+                return;
+            }
+            
+            addPoints(50); // First setup bonus
+            alert(`Ótimo! Você começará a aprender ${appState.selectedLanguage} no nível ${appState.selectedLevel}!`);
+            showTab({ target: document.querySelectorAll('.tab')[1] });
+        }
+
+        // Recording
+        let mediaRecorder;
+        let audioChunks = [];
+
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            
+            if (!appState.isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        audioChunks = [];
+                        await processAudio(audioBlob);
+                    };
+                    
+                    mediaRecorder.start();
+                    appState.isRecording = true;
+                    btn.textContent = '⏹️ Parar Gravação';
+                    btn.classList.add('recording');
+                } catch (error) {
+                    alert('Erro ao acessar microfone: ' + error.message);
+                }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                appState.isRecording = false;
+                btn.textContent = '🎤 Iniciar Gravação';
+                btn.classList.remove('recording');
+            }
+        }
+
+        // Process Audio
+        async function processAudio(audioBlob) {
+            const userText = "Exemplo de transcrição do áudio";
+            addMessage('user', userText);
+            
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(userText);
+                addMessage('ai', aiResponse);
+                
+                // Gamification rewards
+                appState.stats.totalConversations++;
+                addPoints(10);
+                updateQuestProgress('conversations');
+                checkAchievements();
+                updateStats();
+            }, 1000);
+        }
+
+        // Send Text Message
+        function sendTextMessage() {
+            const input = document.getElementById('textInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            addMessage('user', text);
+            input.value = '';
+            
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(text);
+                addMessage('ai', aiResponse);
+                
+                // Gamification rewards
+                appState.stats.totalConversations++;
+                addPoints(10);
+                updateQuestProgress('conversations');
+                checkAchievements();
+                updateStats();
+            }, 1000);
+        }
+
+        // Add Message to Chat
+        function addMessage(type, text) {
+            const container = document.getElementById('chatContainer');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            
+            const label = type === 'user' ? 'Você' : 'LinguaAI';
+            message.innerHTML = `<p><strong>${label}:</strong> ${text}</p>`;
+            
+            container.appendChild(message);
+            container.scrollTop = container.scrollHeight;
+            
+            appState.conversationHistory.push({ type, text, timestamp: Date.now() });
+            saveState();
+        }
+
+        // Generate AI Response (Simulated)
+        function generateAIResponse(userText) {
+            const responses = [
+                "That's great! Can you tell me more about it?",
+                "Excellent pronunciation! Let's try using that in a different context.",
+                "I see you're getting better! How about we practice some new vocabulary?",
+                "Good effort! Remember to focus on the verb tense here.",
+                "Perfect! Now let's try a more complex sentence."
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Play AI Response
+        function playAIResponse() {
+            addPoints(5);
+            alert('A resposta em áudio da IA seria reproduzida aqui usando Text-to-Speech.');
+        }
+
+        // Request Hint
+        function requestHint() {
+            addMessage('ai', '💡 Dica: Tente usar o tempo presente simples para descrever suas atividades diárias. Por exemplo: "I wake up at 7 AM every day."');
+            addPoints(5);
+        }
+
+        // Generate Daily Video
+        function generateDailyVideo() {
+            const loader = document.getElementById('videoLoader');
+            loader.classList.remove('hidden');
+            
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                addPoints(50);
+                completeDailyChallenge('watch_video');
+                alert('Vídeo diário gerado! Na versão completa, um vídeo real com notícias seria criado aqui.');
+                
+                const newsFeed = document.getElementById('newsFeed');
+                newsFeed.innerHTML += `
+                    <div class="news-card">
+                        <h3>Breaking: New Technology Advances</h3>
+                        <p>Scientists have made a breakthrough in renewable energy...</p>
+                    </div>
+                    <div class="news-card">
+                        <h3>Sports: Championship Finals</h3>
+                        <p>The finals are approaching with exciting matchups...</p>
+                    </div>
+                `;
+            }, 3000);
+        }
+
+        // Discuss Video
+        function discussVideo() {
+            showTab({ target: document.querySelectorAll('.tab')[1] });
+            addMessage('ai', '🎥 Vamos discutir o vídeo! What did you find most interesting about the news?');
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('streakNumber').textContent = appState.dailyStreak;
+            document.getElementById('pointsDisplay').textContent = appState.points;
+            document.getElementById('totalConversations').textContent = appState.stats.totalConversations;
+            document.getElementById('minutesPracticed').textContent = appState.stats.minutesPracticed;
+            document.getElementById('wordsLearned').textContent = appState.stats.wordsLearned;
+            document.getElementById('currentLevel').textContent = appState.selectedLevel || '-';
+            
+            updateProgressBar('fluencyProgress', appState.stats.fluency);
+            updateProgressBar('speakingProgress', appState.stats.speaking);
+            updateProgressBar('listeningProgress', appState.stats.listening);
+            updateProgressBar('vocabularyProgress', appState.stats.vocabulary);
+            updateProgressBar('grammarProgress', appState.stats.grammar);
+            
+            updateLevelBadge();
+            
+            if (appState.achievements.length > 0) {
+                renderAchievements();
+                renderQuests();
+                renderDailyChallenges();
+                renderLeaderboard();
+            }
+        }
+
+        // Update Progress Bar
+        function updateProgressBar(id, percentage) {
+            const bar = document.getElementById(id);
+            bar.style.width = percentage + '%';
+            bar.textContent = percentage + '%';
+        }
+
+        // Update Stats
+        function updateStats() {
+            appState.stats.minutesPracticed += Math.floor(Math.random() * 5) + 1;
+            appState.stats.wordsLearned += Math.floor(Math.random() * 3) + 1;
+            appState.stats.fluency = Math.min(100, appState.stats.fluency + 0.5);
+            appState.stats.speaking = Math.min(100, appState.stats.speaking + 0.7);
+            appState.stats.listening = Math.min(100, appState.stats.listening + 0.6);
+            appState.stats.vocabulary = Math.min(100, appState.stats.vocabulary + 0.8);
+            appState.stats.grammar = Math.min(100, appState.stats.grammar + 0.4);
+            
+            updateQuestProgress('minutes', 1);
+            updateQuestProgress('words', Math.floor(Math.random() * 3) + 1);
+            
+            updateUI();
+            saveState();
+        }
+
+        // Get Personalized Suggestions
+        function getPersonalizedSuggestions() {
+            addPoints(20);
+            alert('Sugestões personalizadas seriam geradas aqui com base no seu progresso e padrões de aprendizado!');
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            
+            // Simulate daily streak
+            const lastVisit = localStorage.getItem('lastVisit');
+            const today = new Date().toDateString();
+            
+            if (lastVisit !== today) {
+                appState.dailyStreak++;
+                addPoints(25); // Daily login bonus
+                localStorage.setItem('lastVisit', today);
+                saveState();
+            }
+            
+            updateUI();
+        });
+
+        // Handle Enter key in text input
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('textInput')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendTextMessage();
+                }
+            });
+
+            // Update reset timer (simulated)
+            setInterval(() => {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                
+                const diff = tomorrow - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                const timerEl = document.getElementById('resetTimer');
+                if (timerEl) {
+                    timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+<!-- PWA Installation Script -->
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+                console.log('✅ Service Worker registrado:', registration.scope);
+            })
+            .catch((error) => {
+                console.log('❌ Falha ao registrar Service Worker:', error);
+            });
+    });
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+const installButton = document.createElement('button');
+installButton.textContent = '📱 Instalar App';
+installButton.className = 'btn btn-primary';
+installButton.style.position = 'fixed';
+installButton.style.bottom = '20px';
+installButton.style.left = '50%';
+installButton.style.transform = 'translateX(-50%)';
+installButton.style.zIndex = '9999';
+installButton.style.display = 'none';
+installButton.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+
+document.body.appendChild(installButton);
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installButton.style.display = 'flex';
+});
+
+installButton.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+        return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response: ${outcome}`);
+    deferredPrompt = null;
+    installButton.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+    console.log('✅ PWA instalado com sucesso!');
+    deferredPrompt = null;
+    installButton.style.display = 'none';
+    
+    // Show success notification
+    showNotification('success', '🎉 App Instalado!', 
+        'LinguaAI foi adicionado à sua tela inicial!');
+});
+
+// iOS Add to Home Screen Detection
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+function isInStandaloneMode() {
+    return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
+
+// Show iOS install instructions
+if (isIOS() && !isInStandaloneMode()) {
+    setTimeout(() => {
+        const iosPrompt = document.createElement('div');
+        iosPrompt.style.cssText = `
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s;
+        `;
+        
+        iosPrompt.innerHTML = `
+            <div style="max-width: 400px; margin: 0 auto;">
+                <h3 style="margin-bottom: 10px;">📱 Instalar LinguaAI</h3>
+                <p style="font-size: 0.9em; margin-bottom: 15px;">
+                    Para melhor experiência, adicione à tela inicial:
+                </p>
+                <p style="font-size: 0.85em;">
+                    1. Toque em <strong>Compartilhar</strong> 
+                    <span style="font-size: 1.5em; vertical-align: middle;">⎋</span>
+                    <br>
+                    2. Role e toque em <strong>"Adicionar à Tela de Início"</strong>
+                    <span style="font-size: 1.5em; vertical-align: middle;">➕</span>
+                </p>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        style="margin-top: 15px; padding: 10px 20px; border: 2px solid white; 
+                               background: transparent; color: white; border-radius: 25px; 
+                               font-weight: bold; cursor: pointer;">
+                    Entendi!
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(iosPrompt);
+        
+        // Auto-hide after 15 seconds
+        setTimeout(() => {
+            if (iosPrompt.parentElement) {
+                iosPrompt.remove();
+            }
+        }, 15000);
+    }, 3000);
+}
+
+// Update check
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('🔄 Nova versão disponível!');
+        showNotification('success', '🔄 Atualização Disponível', 
+            'Recarregue a página para ver as novidades!');
+    });
+}
+
+// Online/Offline status
+window.addEventListener('online', () => {
+    showNotification('success', '🌐 Online', 'Conectado à internet!');
+});
+
+window.addEventListener('offline', () => {
+    showNotification('success', '📡 Offline', 'Você pode continuar usando o app offline!');
+});
+</script>
+
+<style>
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* PWA Optimizations for iOS */
+@supports (-webkit-touch-callout: none) {
+    body {
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+    
+    input, textarea, button {
+        -webkit-appearance: none;
+        -webkit-user-select: text;
+    }
+}
+
+/* Safe area for iPhone notch */
+@supports (padding-top: env(safe-area-inset-top)) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+}
+</style>
